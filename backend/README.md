@@ -11,13 +11,21 @@ Backend는 Python 3.10, FastAPI, uvicorn을 사용한다.
 irm https://astral.sh/uv/install.ps1 | iex
 ```
 
-2. backend 폴더로 이동한다.
+2. `uv`가 잘 설치됐는지 확인한다.
+
+```powershell
+uv --version
+```
+
+버전이 출력되면 정상 설치된 것이다.
+
+3. backend 폴더로 이동한다.
 
 ```powershell
 cd backend
 ```
 
-3. 가상환경과 패키지를 설치한다.
+4. 가상환경과 패키지를 설치한다.
 
 ```powershell
 uv sync
