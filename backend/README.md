@@ -10,6 +10,7 @@ Backend는 Python 3.10, FastAPI, uvicorn을 사용한다.
 ```powershell
 irm https://astral.sh/uv/install.ps1 | iex
 ```
+이후 powershell 껐다 켬
 
 2. `uv`가 잘 설치됐는지 확인한다.
 
