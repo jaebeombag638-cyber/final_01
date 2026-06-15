@@ -16,8 +16,11 @@ irm https://astral.sh/uv/install.ps1 | iex
 ```powershell
 cd backend
 ```
-
-3. 가상환경과 패키지를 설치한다.
+3. uv를 설치한다.
+```
+pip install uv
+```
+4. 가상환경과 패키지를 설치한다.
 
 ```powershell
 uv sync
