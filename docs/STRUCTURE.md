@@ -2,10 +2,39 @@
 
 ```
 buildback/
+├── .gitignore
 ├── ai/
 │   └── ai.md
 ├── backend/
-│   └── backend.md
+│   ├── .python-version
+│   ├── README.md
+│   ├── backend.md
+│   ├── pyproject.toml
+│   ├── uv.lock
+│   ├── app/
+│   │   ├── __init__.py
+│   │   ├── main.py
+│   │   ├── api/
+│   │   │   ├── __init__.py
+│   │   │   └── v1/
+│   │   │       ├── __init__.py
+│   │   │       ├── router.py
+│   │   │       └── endpoints/
+│   │   │           ├── __init__.py
+│   │   │           └── health.py
+│   │   ├── schemas/
+│   │   │   ├── __init__.py
+│   │   │   ├── health.py
+│   │   │   └── url.py
+│   │   └── services/
+│   │       ├── __init__.py
+│   │       ├── openai_service.py
+│   │       └── web_risk_service.py
+│   └── tests/
+│       ├── __init__.py
+│       └── api/
+│           ├── __init__.py
+│           └── test_health.py
 ├── frontend/
 │   └── frontend.md
 └── docs/
