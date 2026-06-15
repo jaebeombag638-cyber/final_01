@@ -12,7 +12,6 @@
 | Frontend 빌드 도구 | Vite |
 | Frontend 라우팅 | React Router |
 | UI 스타일링 | Tailwind CSS |
-| UI 컴포넌트 | shadcn/ui |
 | Frontend 화면 QA 도구 | Playwright |
 | Frontend 실행 명령 | npm run dev |
 | Backend 언어 | Python 3.10 |
