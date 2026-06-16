@@ -8,7 +8,7 @@
 |---|---|
 | Frontend 언어 | TypeScript |
 | Frontend 런타임 | Node.js 20+ |
-| Frontend 프레임워크 | React |
+| Frontend 라이브러리 | React |
 | Frontend 빌드 도구 | Vite |
 | Frontend 라우팅 | React Router |
 | UI 스타일링 | Tailwind CSS |
