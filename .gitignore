@@ -3,3 +3,9 @@ __pycache__/
 .pytest_cache/
 *.py[cod]
 
+CLAUDE.md
+AGENTS.md
+.agents/
+.codegraph/
+.codex/
+.claude/
