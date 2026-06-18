@@ -6,6 +6,8 @@
 
 통합 관리자 step은 독립 작업이 아니다. 각 통합 step은 조현정, 김현진, 박건일, 김은경, 박재범 문서의 step을 조합해 하나의 실행 가능한 통합 단위로 관리한다.
 
+단, Step 0은 예외적으로 모든 기능 구현의 선행 조건인 backend DB 기반 설정 step이다. Step 0이 끝나기 전에는 팀원별 feature 브랜치에서 실제 API 저장/조회 연결을 완료 처리하지 않는다.
+
 ## 관리 대상 문서
 
 | 담당자 | 문서 | 담당 범위 | 주요 브랜치 |
@@ -34,6 +36,7 @@
 
 | 통합 step | 포함 팀원 step | 통합 목표 | 완료 기준 |
 | --- | --- | --- | --- |
+| Step 0 | 공통 선행 작업 | DB 스키마와 연결 기반 확정 | PostgreSQL 연결, SQLAlchemy model, Alembic migration, 테스트 DB 적용 기준이 준비된다. |
 | Step 1 | 전원 Step 1 | 기능 계약과 기본 골격 확정 | API, 테이블, 라우트, 브랜치 기준이 맞는다. |
 | Step 2 | 전원 Step 2 | 핵심 조회 흐름 연결 | 서비스, 피드백, 게시글, 마이페이지, 포인트 조회가 동작한다. |
 | Step 3 | 전원 Step 3 | 핵심 생성 흐름 연결 | 가입, 피드백, 서비스 등록, 게시글/댓글, 출석/홍보 신청이 동작한다. |
@@ -44,6 +47,86 @@
 | Step 8 | 전원 Step 8 | 운영 확인 데이터 연결 | 로그, 신고, 마이페이지, 포인트 이력 확인이 가능하다. |
 | Step 9 | 전원 Step 9 | 전체 통합 시나리오 검증 | 핵심 사용자 루프가 `develop`에서 끝까지 동작한다. |
 | Step 10 | 전원 Step 10 | 배포 전 점검 | 문서, 명세, 수동 체크리스트가 정리된다. |
+
+## Step 0 : Backend DB 기반 설정
+
+**포함되는 팀원 step**
+
+- 공통 선행 작업이다.
+- 팀원별 기능 Step 1보다 먼저 완료한다.
+- DB 스키마 변경이 필요한 팀원별 작업은 이 step의 model, migration, 연결 규칙을 기준으로 진행한다.
+
+**통합 목표**
+
+`docs/TABLE_DEF.csv`를 기준으로 1차 배포에 필요한 PostgreSQL 스키마를 구현하고, FastAPI backend가 같은 DB 연결 방식과 migration 기준을 사용하게 한다.
+
+**선행 조건**
+
+- `docs/TECHSPEC.md`의 backend stack 기준을 따른다.
+- `docs/TABLE_DEF.csv`의 테이블과 컬럼 정의를 최신 상태로 확인한다.
+- `docs/API_SPEC.csv`에서 저장/조회에 필요한 식별자와 상태값을 확인한다.
+- 로컬 개발 DB는 Docker PostgreSQL을 사용한다.
+- 운영 DB는 AWS RDS PostgreSQL을 사용한다.
+
+**구현 대상**
+
+- backend 환경변수 `DATABASE_URL` 정의
+- SQLAlchemy engine/session 구성
+- FastAPI request 단위 DB session dependency 구성
+- `docs/TABLE_DEF.csv` 기준 SQLAlchemy model 작성
+- Alembic 초기 설정
+- 1차 schema migration 생성
+- 로컬 Docker PostgreSQL에 migration 적용
+- 테스트 DB에 migration 적용하는 기준 정리
+- seed가 필요한 최소 기준 데이터 정리: `categories`, `promotion_products`
+
+**DB 스키마 정의 기준**
+
+- `docs/TABLE_DEF.csv`가 1차 스키마의 기준 문서다.
+- model 이름, table 이름, PK/FK, nullable 여부, 기본값, 상태값은 migration에 반영한다.
+- CSV에 없는 컬럼이 구현에 필요하면 먼저 `docs/TABLE_DEF.csv`와 담당 팀원 문서의 보완 필요 항목에 남긴다.
+- `users.user_id`, `services.service_id`, `feedbacks.feedback_id`, `community_posts.post_id`, `community_comments.comment_id`, `point_logs.point_log_id`, `promotions.promotion_id`, `report.report_id`는 기능 간 연결 식별자로 사용한다.
+- 포인트, 홍보, 신고, 공개 상태처럼 상태값이 필요한 컬럼은 API 응답 상태값과 같은 용어로 맞춘다.
+
+**DB 연결 기준**
+
+- backend는 환경변수 `DATABASE_URL`로만 DB 접속 정보를 읽는다.
+- 로컬 `.env`는 Docker PostgreSQL 연결 문자열을 사용한다.
+- 운영 EC2 `.env`는 RDS PostgreSQL 연결 문자열을 사용한다.
+- 테스트는 운영 DB와 분리된 테스트 DB 또는 테스트 schema를 사용한다.
+- API handler는 직접 engine을 만들지 않고 공통 session dependency를 통해 DB에 접근한다.
+- migration은 배포 시점에 EC2에서 일회성 Docker Compose 명령으로 실행한다.
+
+**병합 대상 브랜치와 순서**
+
+1. `develop`에서 backend DB 기반 작업 브랜치를 만든다.
+2. DB 기반 작업 브랜치를 `develop`에 먼저 병합한다.
+3. `frontend`를 `develop`에 병합한다.
+4. 팀원별 `feature/*` 브랜치를 `develop`에서 생성한다.
+
+**통합 테스트**
+
+- 로컬 Docker PostgreSQL이 실행된다.
+- backend가 `DATABASE_URL`로 DB에 연결된다.
+- Alembic migration이 빈 DB에 끝까지 적용된다.
+- migration 적용 후 주요 테이블이 생성된다.
+- pytest에서 DB session dependency를 테스트 DB로 교체할 수 있다.
+- `categories`, `promotion_products` 기준 데이터가 필요한 조회 API에서 사용 가능하다.
+
+**통합 완료 조건**
+
+- backend 공통 DB 연결 코드가 한 곳에만 존재한다.
+- SQLAlchemy model과 Alembic migration이 `docs/TABLE_DEF.csv`와 불일치하지 않는다.
+- 빈 PostgreSQL DB에서 migration만으로 1차 schema가 재현된다.
+- 팀원별 Step 1에서 참조하는 주요 테이블이 모두 생성된다.
+- DB 연결 실패, migration 실패, 테스트 DB 미분리 상태가 남아 있지 않다.
+
+**실패 시 되돌림 기준**
+
+- migration이 빈 DB에 적용되지 않으면 Step 1로 넘어가지 않는다.
+- model과 migration이 다르면 migration을 우선 수정하고 기능 브랜치 병합을 중단한다.
+- 운영 RDS 연결 정보가 코드에 직접 들어가면 병합하지 않는다.
+- 테스트가 운영 DB에 연결될 수 있으면 병합하지 않는다.
 
 ## Step 1 : 기능 계약과 기본 골격 통합
 
@@ -61,6 +144,7 @@
 
 **선행 조건**
 
+- Step 0에서 DB 스키마와 DB 연결 기반이 완료되어야 한다.
 - 피그마 화면이 최신 상태로 준비되어 있어야 한다.
 - `docs/API_SPEC.csv`와 `docs/TABLE_DEF.csv`를 최신 상태로 확인한다.
 - 각 팀원 문서의 주요 계약 섹션이 비어 있지 않아야 한다.
