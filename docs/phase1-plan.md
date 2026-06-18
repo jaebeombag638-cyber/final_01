@@ -1,5 +1,7 @@
 # BuildBack 1차 배포 PLAN
 
+BuildBack: 빌더들이 서로의 첫 사용자가 되어주는 공개 성장 플랫폼
+
 > 목표: 완성형 AI 서비스가 아니라, 빌더들이 실제로 가입하고 서비스를 등록하며 서로 피드백을 남기는 핵심 순환 구조를 빠르게 검증한다.
 
 ## 1. 1차 배포 목적
@@ -21,139 +23,185 @@ BuildBack의 장기 비전은 초보 빌더들이 서로의 첫 사용자가 되
     ↓
 내 서비스 등록
     ↓
-홍보 슬롯 구매
+홍보 상품 구매
+    ↓
+홍보 진행
     ↓
 피드백 수집
 ```
 
 핵심 지표는 "가입자가 실제 피드백을 남기는가", "피드백을 남긴 사용자가 자신의 서비스를 등록하는가", "빡낌을 홍보에 사용하는가"이다.
 
-
-## 2. 사용할 공통 테이블
-
-### users
-
-- id
-- oauth_provider
-- oauth_id
-- email
-- nickname
-- avatar_url
-- point_balance
-- joined_at
-- last_login_at
-- is_banned
-
-### user_interests
-
-- id
-- user_id
-- category_id
-- created_at
-
-### categories
-
-- id
-- name
-- slug
-- sort_order
-- is_active
-
-### services
-
-- id
-- owner_user_id
-- category_id
-- title
-- description
-- url
-- url_risk_status
-- status
-- created_at
-- updated_at
-
-### feedbacks
-
-- id
-- service_id
-- author_user_id
-- content
-- quality_status
-- quality_reason
-- created_at
-- updated_at
-- deleted_at
-
-### point_transactions
-
-- id
-- user_id
-- amount
-- reason
-- related_type
-- related_id
-- created_at
-
-### promotion_products
-
-- id
-- name
-- price
-- slot_limit
-- duration_hours
-- placement
-- is_active
-
-### promotions
-
-- id
-- service_id
-- buyer_user_id
-- product_id
-- starts_at
-- ends_at
-- status
-- created_at
-
-### attendances
-
-- id
-- user_id
-- attendance_date
-- streak_count
-- reward_amount
-- created_at
-
-### community_posts
-
-- id
-- board_type
-- author_user_id
-- title
-- content
-- status
-- created_at
-- updated_at
-
-### reports
-
-- id
-- reporter_user_id
-- target_type
-- target_id
-- reason
-- detail
-- status
-- created_at
-- resolved_at
-
-
-## 3. 데이터 수집 목표
-
 1차 배포의 진짜 목적은 완성된 기능이 아니라 향후 AI 기능을 위한 실제 데이터를 모으는 것이다.
 
 
-## 4. 1차 배포 완료 기준
+## 2. 사용할 공통 테이블
+
+docs/TABLE_DEF.csv
+
+## 3. API 명세서
+
+docs/API_SPEC.csv
+
+## 4. 계획 수립 규칙
+
+1차 배포 계획은 피그마 화면을 기준으로 사용자 흐름을 먼저 맞추되, 프론트엔드와 백엔드가 따로 완성된 뒤 한 번에 붙는 방식으로 작성하지 않는다. `docs/API_SPEC.csv`와 `docs/TABLE_DEF.csv`를 기능 계약으로 보고, 각 팀원 계획은 화면, API, 테이블, 상태값, 완료 조건이 같은 기준을 바라보도록 작성한다.
+
+피그마가 준비되어 있으므로 프론트엔드는 먼저 `frontend` 브랜치에서 피그마 MCP를 붙여 기초 화면 코드를 한 번에 구현한다. 이 단계의 목적은 화면 구조, 컴포넌트 배치, 기본 스타일, 목업 데이터 흐름을 피그마에 가깝게 만드는 것이다. 피그마 의도와 다르게 생성된 부분은 `frontend` 브랜치에서 1차로 정리한 뒤 `develop`에 병합한다.
+
+각 팀원은 `frontend` 브랜치가 `develop`에 병합된 이후 본인 `feature/*` 브랜치에서 작업한다. 팀원별 작업은 피그마 기반 프론트 코드를 새로 갈아엎는 방식이 아니라, 이미 생성된 화면과 컴포넌트를 담당 기능에 맞게 조금씩 수정하면서 실제 API, 권한, 상태, 예외 처리를 연결하는 방식으로 진행한다.
+
+각 화면에서 호출할 API, 필요한 응답 필드, 빈 상태, 에러 상태, 권한 실패 상태는 해당 step 안에 함께 명시한다. 백엔드는 같은 step에서 API와 데이터 저장 규칙을 구현하고, 프론트엔드가 목업에서 실제 API로 교체할 수 있는 시점을 완료 조건에 포함한다.
+
+### 4.1 역할 분담
+
+1차 배포의 기능 담당자는 아래 기준으로 나눈다.
+
+| 담당자 | 담당 범위 |
+| --- | --- |
+| 조현정 | 서비스 등록 |
+| 김현진 | 피드백, 소셜 로그인, 최초 로그인 시 관심분야 입력 |
+| 박건일 | 커뮤니티 기능 전체, 신고 |
+| 김은경 | 마이페이지, 커뮤니티 댓글, 팔로우/팔로잉 기능 |
+| 박재범 | 홍보, 포인트 관련 기능 |
+
+### 4.2 산출 문서
+
+1차 배포 전 아래 문서를 만든다.
+
+- 통합 관리자 계획 문서 1개
+- 팀원별 구현 계획 문서 5개
+
+팀원별 구현 계획 문서는 담당 기능 단위로 나누고, 각 문서는 최대 15개 step으로 작성한다. step은 단순 일정표가 아니라 "구현, 연결, 검증이 끝나는 작은 완료 단위"여야 한다.
+
+팀원별 step 번호는 최대한 같은 작업 단계에 맞춘다. 예를 들어 모든 팀원의 step 1은 기능 계약 확인과 기본 골격, step 2는 핵심 조회 흐름, step 3은 핵심 생성/등록 흐름처럼 비슷한 성격의 작업이 오도록 맞춘다. 담당 기능 특성상 순서가 달라져야 하면, 해당 step에 왜 순서가 다른지와 어느 팀원의 몇 번 step과 연결되는지 적는다.
+
+### 4.3 통합 관리자 계획 문서 규칙
+
+통합 관리자 문서의 step은 독립적인 작업 step이 아니다. 5개 팀원 문서에 있는 step들을 모아서 "어떤 팀원의 몇 번 step들을 함께 합치고 검증할지"를 정리하는 상위 통합 step이다.
+
+예시:
+
+- 통합 step 1: 김현진 step 1 + 조현정 step 1 + 박재범 step 1
+- 통합 step 2: 김현진 step 2 + 조현정 step 2 + 김은경 step 1
+- 통합 step 3: 김현진 step 3 + 박재범 step 2 + 조현정 step 3
+
+통합 관리자 문서에는 아래 항목을 통합 step별로 작성한다.
+
+- step 목표
+- 포함되는 팀원별 step 목록
+- 통합 대상 기능
+- 선행되어야 하는 팀원 작업
+- 통합 완료 조건
+- 병합 대상 브랜치와 병합 순서
+- 통합 테스트 방법
+- 실패 시 되돌릴 수 있는 기준
+
+통합 관리자는 팀원별 산출물이 서로 맞물리는 지점을 따로 추적한다. 특히 로그인/세션, 포인트 지급, 서비스 등록 조건, 홍보 노출, 신고 처리, 마이페이지 요약처럼 여러 담당자의 기능이 섞이는 흐름은 반드시 통합 step으로 분리한다.
+
+통합 step에는 아래 형태의 매핑 표를 둔다.
+
+| 통합 step | 포함 팀원 step | 통합 목표 | 선행 조건 | 완료 조건 |
+| --- | --- | --- | --- | --- |
+| 1 | 김현진 step 1, 조현정 step 1, 박재범 step 1 | 로그인 사용자와 기본 데이터 계약 확정 | 공통 테이블/API 확인 | 각 브랜치가 통합 브랜치에서 함께 실행됨 |
+
+### 4.4 팀원별 구현 계획 문서 규칙
+
+각 팀원 문서에는 아래 항목을 step별로 작성한다.
+
+- step 목표
+- 공통 작업 단계
+- 구현할 화면 또는 API
+- 사용할 테이블과 주요 필드
+- 완료 조건
+- 다른 팀원 기능과 엮이는 부분
+- 작업 브랜치명
+- 구현 결과를 직접 확인하는 방법
+
+공통 작업 단계는 아래 기준을 우선 사용한다.
+
+| step | 공통 작업 단위 |
+| --- | --- |
+| step 1 | 기능 계약 확인, 라우트/화면/API 골격, 목업 또는 기본 응답 |
+| step 2 | 핵심 조회 흐름 |
+| step 3 | 핵심 생성/등록 흐름 |
+| step 4 | 수정/삭제 또는 상태 변경 흐름 |
+| step 5 | 보상, 제한, 권한, 정책 검증 |
+| step 6 | 다른 담당 기능과의 1차 연결 |
+| step 7 | 에러, 빈 상태, 예외 케이스 처리 |
+| step 8 | 관리자/운영 확인 또는 이력 조회 |
+| step 9 | 통합 테스트 보강 |
+| step 10 | 배포 전 점검과 문서 정리 |
+
+담당 기능상 특정 step이 필요 없으면 "해당 없음"으로 비워두지 않는다. 가장 가까운 공통 작업 단위에 맞춰 계획을 재배치하거나, 해당 step이 왜 생략되는지와 어느 통합 step에서 검증되는지 적는다.
+
+다른 팀원 기능과 엮이는 부분은 사람 이름과 연결 내용을 함께 쓴다.
+
+예시:
+
+- 김현진: 피드백 품질 검사 통과 시 박재범 포인트 지급 API 호출
+- 조현정: 서비스 등록 조건에서 김현진 피드백 작성 여부 조회
+- 박재범: 홍보 구매 완료 후 조현정 서비스 목록 노출 우선순위 반영
+
+### 4.5 브랜치와 병합 규칙
+
+1차 배포 브랜치는 `main`, `develop`, `frontend`, `feature/*` 구조로 관리한다. `frontend`는 피그마 MCP 기반 프론트 기초 코드 전용 브랜치이며, 팀원별 기능 브랜치보다 먼저 `develop`에 병합한다.
+
+```text
+main
+└── develop
+    ├── frontend
+    ├── feature/login
+    ├── feature/feedback
+    ├── feature/service-registration
+    ├── feature/posts
+    ├── feature/comments
+    ├── feature/mypage
+    └── feature/points
+```
+
+- `main`: 배포 가능한 안정 버전만 둔다.
+- `develop`: 통합 관리자가 피그마 기초 프론트와 팀원 기능을 모아 통합 테스트하는 브랜치다.
+- `frontend`: 피그마 MCP로 생성한 프론트 기초 코드와 피그마 의도 보정 작업을 담는 선행 브랜치다.
+- `feature/*`: 팀원이 실제 작업하는 기능 브랜치다.
+
+작업 순서는 `frontend` 브랜치에서 피그마 기반 프론트 기초 코드를 먼저 구현하고, 통합 관리자가 이를 `develop`에 병합한 뒤, 각 팀원이 `develop`에서 본인 `feature/*` 브랜치를 만들어 기능을 붙이는 흐름으로 간다.
+
+각 팀원은 본인 담당 범위의 `feature/기능명` 브랜치에서만 작업한다. 기능이 크면 `feature/기능명-세부기능`처럼 더 잘게 쪼갤 수 있다. 팀원별 프론트 수정은 담당 화면과 연결 컴포넌트에 한정하고, 공통 레이아웃이나 공통 컴포넌트를 크게 바꿔야 하면 통합 관리자에게 먼저 공유한다.
+
+예시:
+
+- 김현진: `feature/login`, `feature/feedback`, `feature/onboarding-interests`
+- 조현정: `feature/service-registration`
+- 박건일: `feature/posts`, `feature/reports`
+- 김은경: `feature/mypage`, `feature/comments`, `feature/follow`
+- 박재범: `feature/points`, `feature/promotions`
+
+기능 브랜치는 팀원이 직접 `main`에 병합하지 않는다. 통합 관리자가 먼저 `frontend`를 `develop`에 병합하고, 이후 통합 관리자 문서의 통합 step 매핑표를 기준으로 필요한 `feature/*` 브랜치를 `develop`에 병합한다.
+
+예를 들어 통합 step 2가 김현진 step 2, 조현정 step 2, 김은경 step 1을 포함한다면 통합 관리자는 해당 step에 필요한 브랜치만 `develop`에 순서대로 병합하고 통합 테스트를 진행한다.
+
+통합 관리자 문서에는 통합 step별로 아래 내용을 적는다.
+
+- 병합할 `feature/*` 브랜치
+- 병합 순서
+- 포함되는 팀원별 step
+- 충돌 예상 파일
+- 병합 후 확인할 사용자 흐름
+- 실패 시 되돌리거나 제외할 브랜치
+
+`develop`에서 통합 테스트를 통과한 상태만 `main`으로 병합한다. `main` 병합 후에는 1차 배포 후보 상태로 보고, 배포 전 점검과 운영 확인을 진행한다.
+
+### 4.6 계획 작성 시 금지 사항
+
+- "프론트 완료 후 백엔드 연결"처럼 통합 시점이 마지막에 몰리는 계획
+- API 응답 필드가 빠진 화면 구현 계획
+- 테이블 상태값과 예외 케이스가 없는 백엔드 구현 계획
+- 다른 팀원 의존성이 있는데 담당자와 연결 내용을 적지 않은 계획
+- 확인 방법이 "테스트한다"처럼 추상적인 완료 조건
+
+
+## 5. 1차 배포 완료 기준
 
 다음 조건을 만족하면 1차 배포 가능 상태로 본다.
 
