@@ -1,91 +1,76 @@
-table,korean_name,column_id,data_type,length,nullable,default_value,pk,fk,ref_table,constraints
-users,회원 아이디,user_id,BIGINT,50,not null,,PK,,,GENERATED ALWAYS AS IDENTITY
-users,닉네임,nickname,VARCHAR,50,not null,,,,,UNIQUE
-users,역할,role,,,,,,,,
-users,보유 포인트,current_points,INT,,not null,,,,,DEFAULT 500; CHECK (current_points >= 0)
-users,생성 일자,created_at,TIMESTAMP,,not null,now(),,,,DEFAULT NOW()
-users,구글 oauth_id,oauth_id,VARCHAR,255,not null,,,,,UNIQUE
-users,마지막 로그인 일자,last_login,DATETIME,,not null,,,,,
-users,팔로워 수,follower_count,INT,,,,,,,
-users,팔로잉 수,following_count,INT,,,,,,,
-user_interests,회원 아이디,user_id,BIGINT,50,not null,,PK,FK,users,REFERENCES users(user_id) ON DELETE CASCADE
-user_interests,카테고리 아이디,category_id,INT,,not null,,PK,FK,categories,REFERENCES categories(category_id) ON DELETE CASCADE
-attendance,출석 아이디,attend_id,BIGINT,,,,,PK,,,
-attendance,회원 아이디,user_id,BIGINT,50,not null,,,FK,users,REFERENCES users(user_id) ON DELETE CASCADE
-attendance,출석일,attended_date,VARCHAR,,not null,,,,,
-attendance,연속 출석일,streak_count,INT,,not null,1,,,,DEFAULT 1
-categories,카테고리 아이디,category_id,INT,,not null,,PK,,,SERIAL
-categories,카테고리 이름,category_name,VARCHAR,50,not null,,,,,UNIQUE
-services,등록 서비스 아이디,service_id,BIGINT,GENERATED ALWAYS,not null,,PK,,,GENERATED ALWAYS AS IDENTITY
-services,회원 아이디,user_id,BIGINT,50,not null,,,FK,users,REFERENCES users(user_id) ON DELETE CASCADE
-services,카테고리 아이디,category_id,INT,,not null,,,FK,categories,REFERENCES categories(category_id) ON DELETE CASCADE
-services,등록 서비스 제목,title,VARCHAR,200,not null,,,,,
-services,등록 서비스 한 줄 소개,summary,VARCHAR,300,not null,,,,,
-services,등록 서비스 내용,content,VARCHAR,,not null,,,,,
-services,서비스 URL,service_url,TEXT,500,not null,,,,,
-services,썸네일 이미지,thumbnail_url,TEXT,,NULLABLE,,,,,
-services,등록 상태,status,VARCHAR,20,not null,,,,,DEFAULT '대기중'; CHECK (status IN ('대기중' '활성' '차단'))
-services,생성날짜,created_at,TIMESTAMP,,not null,,,,,DEFAULT NOW()
-services,조회수,view_count,,,,,,,,
-feedbacks,피드백 아이디,feedback_id,BIGINT,GENERATED ALWAYS,not null,,PK,,,Auto Increment
-feedbacks,등록 서비스 아이디,service_id,BIGINT,,not null,,,FK,services,REFERENCES services(service_id) ON DELETE CASCADE
-feedbacks,회원 아이디,user_id,BIGINT,50,not null,,,FK,users,REFERENCES users(user_id) ON DELETE CASCADE
-feedbacks,피드백 내용,content,VARCHAR,,not null,,,,,
-feedbacks,생성시간,created_at,TIMESTAMP,,not null,,,,,DEFAULT NOW()
-feedbacks,수정시간,updated_at,TIMESTAMP,,not null,,,,,DEFAULT NOW()
-feedbacks,글자수,char_count,INT,,,,,,,
-promotions,홍보 아이디,promotion_id,BIGINT,,not null,,PK,,,GENERATED ALWAYS AS IDENTITY
-promotions,홍보 종류 아이디,promo_product_id,INT,,not null,,,FK,,REFERENCES promotion_products ON DELETE RESTRICT
-promotions,등록 서비스 아이디,service_id,BIGINT,,not null,,,FK,services,REFERENCES services(service_id) ON DELETE CASCADE
-promotions,사용 포인트,used_points,INT,,not null,,,,,CHECK (used_points >= 0)
-promotions,시작일자,start_at,TIMESTAMP,,not null,,,,,DEFAULT NOW()
-promotions,종료일자,end_at,TIMESTAMP,,not null,,,,,
-promotions,활성화 상태,status,VARCHAR,20,not null,,,,,DEFAULT '진행중'; CHECK (status IN ('진행중' '종료됨'))
-point_logs,포인트 로그 아이디,log_id,BIGINT,,not null,,PK,,,GENERATED ALWAYS AS IDENTITY
-point_logs,회원 아이디,user_id,BIGINT,50,not null,,,FK,users,REFERENCES users(user_id) ON DELETE CASCADE
-point_logs,포인트 변동량,amount,INT,,not null,,,,,CHECK (amount <> 0)
-point_logs,현재 포인트,current_point,INT,,not null,,,,,CHECK (current_point >= 0)
-point_logs,획득 사유,reason,VARCHAR,255,not null,,,,,
-point_logs,포인트 변동 시간,updated_at,TIMESTAMP,,not null,,,,,DEFAULT NOW()
-community_posts,포스트 아이디,post_id,BIGINT,,not null,,PK,,,GENERATED ALWAYS AS IDENTITY
-community_posts,회원 아이디,user_id,BIGINT,50,not null,,,FK,users,REFERENCES users(user_id) ON DELETE CASCADE
-community_posts,포스트 유형,post_type,VARCHAR,20,not null,,,,,CHECK (post_type IN ('자유게시판' '팀구하기' '문의'))
-community_posts,포스트 제목,post_title,VARCHAR,200,not null,,,,,
-community_posts,포스트 내용,post_content,VARCHAR,,not null,,,,,
-community_posts,포스트 생성 일시,created_at,TIMESTAMP,,not null,,,,,DEFAULT NOW()
-community_posts,포스트 수정 일시,updated_at,TIMESTAMP,,,,,,,
-community_posts,조회수,view_count,INT,,,,,,,
-community_comments,댓글 아이디,comment_id,BIGINT,GENERATED ALWAYS,not null,,PK,,,GENERATED ALWAYS AS IDENTITY
-community_comments,포스트 아이디,post_id,BIGINT,,not null,,,FK,community_posts,REFERENCES community_posts(post_id) ON DELETE CASCADE
-community_comments,회원 번호,user_id,BIGINT,,not null,,,FK,users,REFERENCES users(user_id) ON DELETE CASCADE
-community_comments,댓글 내용,content,VARCHAR,500,not null,,,,,
-community_comments,댓글 등록 시간,created_at,TIMESTAMP,,not null,,,,,DEFAULT NOW()
-community_comments,댓글 수정 시간,updated_at,TIMESTAMP,,,,,,,
-report,신고 아이디,report_id,BIGINT,50,not null,,PK,,,GENERATED ALWAYS AS IDENTITY
-report,회원아이디,user_id,BIGINT,50,not null,,,FK,users,REFERENCES users(user_id) ON DELETE CASCADE
-report,신고 유형,report_type,VARCHAR,20,not null,,,,,CHECK (report_type IN ('ILLEGAL' 'SPAM' 'ABUSE' 'PLAGIARISM' 'OTHER'))
-report,신고 대상 구분,target_type,VARCHAR,20,,,,,,CHECK (target_type IN ('SERVICE' 'COMMUNITY' 'FEEDBACK' 'COMMENT'))
-report,신고 대상 아이디,target_id,BIGINT,,not null,,,,,
-report,신고 사유,report_reason,VARCHAR,,nullable,,,,,
-report,신고 일시,created_at,TIMESTAMP,,not null,,,,,DEFAULT NOW()
-report,처리 상태,status,VARCHAR,20,,,,,,DEFAULT 'PENDING'; CHECK (status IN ('PENDING' 'APPROVED' 'REJECTED'))
-promotion_products,홍보 상품 아이디,promo_product_id,INT,,not null,,PK,,,GENERATED ALWAYS AS IDENTITY
-promotion_products,홍보 상품 이름,promo_product_name,VARCHAR,,not null,,,,,UNIQUE
-promotion_products,홍보 상품 가격,price,INT,,not null,,,,,CHECK (price >= 0)
-promotion_products,노출 일수,duration_days,INT,,not null,,,,,CHECK (duration_days > 0)
-promotion_products,노출 위치,placement,VARCHAR,100,not null,,,,,
-promotion_products,슬롯 수,slot_limit,INT,,not null,,,,,CHECK (slot_limit > 0)
-promotion_products,활성화 여부,is_active,BOOLEAN,,not null,true,,,,DEFAULT true
-service_entry_logs,로그 id,log_id,,,,,PK,,,
-service_entry_logs,회원 id,user_id,,,,,,FK,,
-service_entry_logs,세션 id,session_id,DATETIME,,,,,,,
-service_entry_logs,진입한 서비스,service_id,,,,,,FK,,
-service_entry_logs,광고 종류,promo_product_id,,,,,,FK,,
-service_entry_logs,진입 시각,occurred_at,,,,,,,,
-service_entry_logs,클릭 발생 페이지,source_page,,,,,,,,
-user_follows,팔로우 관계 id,follow_id,BIGSERIAL,,not null,,PK,,,
-user_follows,팔로우 건 user id,follower_id,BIGINT,,not null,,,FK,users,REFERENCES users(user_id)
-user_follows,팔로우 당한 user id,following_id,BIGINT,,not null,,,FK,users,REFERENCES users(user_id); UNIQUE (follower_id, following_id)
-user_follows,상태,status,VARCHAR,,,,,,,"ACTIVE / BLOCKED / DELETED"
-user_follows,팔로우 일시,created_at,DATETIME,,,,,,,
-user_follows,상태 변경 일시,updated_at,DATETIME,,,,,,,
+﻿Table,Column Name,Column ID,Key Type
+users,구글 oauth_id,oauth_id,-
+users,회원 아이디,user_id,PK
+users,생성 일자,created_at,-
+users,마지막 로그인 일자,last_login,-
+users,팔로워 수,follower_count,-
+users,팔로잉 수,following_count,-
+users,닉네임,nickname,-
+users,보유 포인트,current_points,-
+users,역할,role,-
+user_interests,회원 아이디,user_id,"PK,FK"
+user_interests,카테고리 아이디,category_id,"PK,FK"
+attendance,회원 아이디,user_id,FK
+attendance,출석 아이디,attend_id,PK
+categories,카테고리 이름,category_name,-
+categories,카테고리 아이디,category_id,PK
+services,회원 아이디,user_id,FK
+services,등록 서비스 내용,content,-
+services,등록 서비스 제목,title,-
+services,등록 상태,status,-
+services,생성날짜,created_at,-
+services,등록 서비스 아이디,service_id,PK
+services,카테고리 아이디,category_id,FK
+feedbacks,등록 서비스 아이디,service_id,FK
+feedbacks,피드백 내용,content,-
+feedbacks,피드백 아이디,feedback_id,PK
+feedbacks,회원 아이디,user_id,FK
+feedbacks,수정시간,updated_at,-
+feedbacks,생성시간,created_at,-
+feedbacks,글자수,char_count,-
+promotions,사용 포인트,used_points,-
+promotions,활성화 상태,status,-
+promotions,등록 서비스 아이디,service_id,FK
+promotions,홍보 종류 아이디,promo_product_id,FK
+promotions,홍보 아이디,promotion_id,PK
+promotions,종료일자,end_at,-
+promotions,시작일자,start_at,-
+point_logs,포인트 로그 아이디,log_id,PK
+point_logs,현재 포인트,current_points,-
+point_logs,포인트 변동 시간,updated_at,-
+point_logs,포인트 변동량,amount,-
+point_logs,회원 아이디,user_id,FK
+community_posts,포스트 아이디,post_id,PK
+community_posts,포스트 제목,post_title,-
+community_posts,포스트 생성 일시,created_at,-
+community_posts,포스트 내용,post_content,-
+community_posts,포스트 수정 일시,updated_at,-
+community_posts,회원 아이디,user_id,FK
+community_comments,포스트 아이디,post_id,FK
+community_comments,댓글 아이디,comment_id,PK
+community_comments,댓글 내용,content,-
+community_comments,댓글 수정 시간,updated_at,-
+report, 신고 대상 구분, target_type,-
+report,신고 대상 아이디,target_id,-
+report,신고 아이디,report_id,PK
+report,신고 유형,report_type,-
+report,신고 사유,report_reason,-
+report,신고 일시,created_at,-
+report,신고 처리 상태,status,-
+report,회원아이디,user_id,FK
+promotion_products,홍보 종류 가격,price,-
+promotion_products,홍보 종류 아이디,promo_product_id,PK
+promotion_products,홍보 종류 이름,promo_product_name,-
+service_entry_logs,진입한 서비스,service_id,FK
+service_entry_logs,로그 id,log_id,PK
+service_entry_logs,진입 시각,occurred_at,-
+service_entry_logs,회원 id,user_id,FK
+service_entry_logs,세션 id,session_id,-
+service_entry_logs,클릭 발생 페이지,source_page,-
+service_entry_logs,광고 종류,promo_product_type,FK
+user_follows,팔로우 일시,created_at,-
+user_follows,상태 변경 일시,updated_at,-
+user_follows,팔로우 관계 id,follow_id,PK
+user_follows,팔로우 당한 user id,following_id,FK
+user_follows,팔로우 건 user id,follower_id,FK
+user_follows,status,상태,-

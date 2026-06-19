@@ -1,0 +1,26 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: buildback
+      POSTGRES_PASSWORD: buildback
+      POSTGRES_DB: buildback
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  db_test:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: buildback
+      POSTGRES_PASSWORD: buildback
+      POSTGRES_DB: buildback_test
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+  postgres_test_data:

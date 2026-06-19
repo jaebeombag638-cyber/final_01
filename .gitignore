@@ -3,9 +3,17 @@ __pycache__/
 .pytest_cache/
 *.py[cod]
 
+# 환경변수 (운영/로컬 DB 접속 정보 포함)
+.env
+.env.local
+backend/.env
+backend/.env.local
+
 CLAUDE.md
 AGENTS.md
 .agents/
 .codegraph/
 .codex/
 .claude/
+
+docs/team-plans/PJB-step1-contract.md
